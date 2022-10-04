@@ -1,3 +1,5 @@
+let longUrlValue = "";
+
 function generateRandomString(randomString) {
   const alphaNumerics = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   let newString = "";
@@ -48,6 +50,10 @@ app.post("/urls", (req, res) => {
 
   let id = generateRandomString(req.body.longURL);
 
+  //Store value of inputted url into a string for later use
+
+  longUrlValue = req.body.longURL
+
   //Assign new id along with url to urlDatabase
 
   urlDatabase[id] = req.body.longURL 
@@ -58,7 +64,11 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase.b2xVn2 };
+  //Store Id in a variable. Slice to eliminate the period at front of id.
+  let id = req.params.id.slice(1);
+  //Use id variable to target long url value through object! 
+  const templateVars = { id: req.params.id, longURL: urlDatabase[id] };
+  console.log(id);
   res.render("urls_show", templateVars);
 });
 
