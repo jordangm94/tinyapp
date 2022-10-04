@@ -44,8 +44,17 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  //req.body.longurl = inputted url, turn this into random string, store in id.
+
+  let id = generateRandomString(req.body.longURL);
+
+  //Assign new id along with url to urlDatabase
+
+  urlDatabase[id] = req.body.longURL 
+  
+  console.log(urlDatabase); // Log the new URL DATABASE
+  
+  res.redirect(`/urls/:${id}`); // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls/:id", (req, res) => {
