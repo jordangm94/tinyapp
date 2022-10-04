@@ -1,3 +1,18 @@
+function generateRandomString(randomString) {
+  const alphaNumerics = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  let newString = "";
+  let loopCount = 0;
+  for (let value of randomString) {
+    value = alphaNumerics[Math.floor(Math.random() * alphaNumerics.length)];
+    newString += value;
+    loopCount = loopCount + 1;
+    if (loopCount > 5) {
+      break;
+    }
+  }
+  return newString;
+}
+
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
