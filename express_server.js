@@ -84,7 +84,6 @@ app.get("/urls/:id", (req, res) => {
 //////////////////////////////////
 app.get("/u/:id", (req, res) => {
   //Once again targetting id of inputted URL
-  console.log(req.params.id);
   let id = req.params.id
 
   //Target longurl in object using id and store in variable
@@ -94,6 +93,20 @@ app.get("/u/:id", (req, res) => {
   //Now will redirect to longurl. NOTE: Only works if url is typed starting with http://
   res.redirect(longURL);
 });
+
+///////////////////////////////////
+//Handle delete request of a url in the database
+//////////////////////////////////
+
+app.post("/urls/:id/delete", (req, res) => {
+  let id = req.params.id
+  delete urlDatabase[id];
+  res.redirect(`/urls`)
+});
+
+
+
+
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
