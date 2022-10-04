@@ -45,6 +45,10 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+///////////////////////////////////
+//URL list page. Triggered after new url inputted in forum and posting to /URLS list, once triggered rediret to ID Page for URL.  
+//////////////////////////////////
+
 app.post("/urls", (req, res) => {
   //req.body.longurl = inputted url, turn this into random string, store in id.
 
@@ -54,22 +58,41 @@ app.post("/urls", (req, res) => {
 
   longUrlValue = req.body.longURL
 
-  //Assign new id along with url to urlDatabase
+  //Assign new id along with url to urlDatabase. This inputs both the id key and url value into database. 
 
   urlDatabase[id] = req.body.longURL 
   
   console.log(urlDatabase); // Log the new URL DATABASE
   
-  res.redirect(`/urls/:${id}`); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${id}`); // Redirection to /urls/:id
 });
+
+///////////////////////////////////
+//ID Page for your URL, redirected here after URL inputted in forum! 
+//////////////////////////////////
 
 app.get("/urls/:id", (req, res) => {
   //Store Id in a variable. Slice to eliminate the period at front of id.
-  let id = req.params.id.slice(1);
+  let id = req.params.id
   //Use id variable to target long url value through object! 
   const templateVars = { id: req.params.id, longURL: urlDatabase[id] };
   console.log(id);
   res.render("urls_show", templateVars);
+});
+///////////////////////////////////
+//Redirect shorturls back to website of long url
+//////////////////////////////////
+app.get("/u/:id", (req, res) => {
+  //Once again targetting id of inputted URL
+  console.log(req.params.id);
+  let id = req.params.id
+
+  //Target longurl in object using id and store in variable
+
+  let longURL = urlDatabase[id];
+
+  //Now will redirect to longurl. NOTE: Only works if url is typed starting with http://
+  res.redirect(longURL);
 });
 
 app.get("/hello", (req, res) => {
