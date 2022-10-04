@@ -72,7 +72,7 @@ app.post("/urls", (req, res) => {
 //////////////////////////////////
 
 app.get("/urls/:id", (req, res) => {
-  //Store Id in a variable. Slice to eliminate the period at front of id.
+  //Store Id in a variable. 
   let id = req.params.id
   //Use id variable to target long url value through object! 
   const templateVars = { id: req.params.id, longURL: urlDatabase[id] };
@@ -101,8 +101,16 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   let id = req.params.id
   delete urlDatabase[id];
-  res.redirect(`/urls`)
+  res.redirect(`/urls`);
 });
+
+app.post("/urls/:id", (req, res) => {
+  let id = req.params.id;
+  let longURL = req.body.longURL;
+  console.log(longURL)
+  urlDatabase[id] = longURL;
+  res.redirect('/urls');
+})
 
 
 
