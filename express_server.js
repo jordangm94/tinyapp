@@ -133,6 +133,22 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 })
 
+///////////////////////////////////
+//Handle loading registration page to sign up for account. 
+//////////////////////////////////
+
+app.get("/registration", (req, res) => {
+  const templateVars = { username: req.cookies["username"] }
+  res.render("urls_registration", templateVars)
+})
+
+///////////////////////////////////
+//Handle if registration form is submitted! 
+//////////////////////////////////
+app.post("/registration", (req, res) => {
+  res.render("urls_registration", templateVars)
+})
+
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
