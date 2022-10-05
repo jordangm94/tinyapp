@@ -104,11 +104,23 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(`/urls`);
 });
 
+///////////////////////////////////
+//Handle redirection to urls/id, such as when you click edit on a particular id
+//////////////////////////////////
+
 app.post("/urls/:id", (req, res) => {
   let id = req.params.id;
   let longURL = req.body.longURL;
   console.log(longURL)
   urlDatabase[id] = longURL;
+  res.redirect('/urls');
+})
+///////////////////////////////////
+//Handle redirection after user has submitted username, will store username as cookie. 
+//////////////////////////////////
+app.post("/login", (req, res) => {
+  let username = req.body.username
+  res.cookie(username, username)
   res.redirect('/urls');
 })
 
