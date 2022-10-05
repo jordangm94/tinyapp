@@ -16,6 +16,14 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <!-- The next line designates the form for login on the header of each page. -->
+        <form method="POST" action="/login">
+          <input type="text"
+          name="username"
+          placeholder="Type username here!"
+          />
+          <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
       </div>
     </div>
   </nav>
