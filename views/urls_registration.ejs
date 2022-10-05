@@ -24,7 +24,7 @@
     <main style="margin: 1em;">
       <h1>Welcome to TinyApp!</h1>
         <h3>Please input your information below to register and get started:</h3>
-      <form class="form-inline" action="/registration" method="POST">
+      <form action="registration" method="POST">
         <div class="form-group mb-2">
           <label for="longURL">Username:</label>
           <input
@@ -34,21 +34,19 @@
             placeholder="Enter your username here..."
             style="width: 300px; margin: 1em"
           />
+          <div class="form-group mb-2">
+            <label for="longURL">Password:</label>
+            <input
+              class="form-control"
+              type="password"
+              name="password"
+              placeholder="Enter your password here..."
+              style="width: 300px; margin: 1em"
+            />
+          </div>
         </div>
+        <button type="submit" class="btn btn-success">Register!</button>
       </form>
-      <form class="form-inline" action="/registration" method="POST">
-        <div class="form-group mb-2">
-          <label for="longURL">Password:</label>
-          <input
-            class="form-control"
-            type="password"
-            name="password"
-            placeholder="Enter your password here..."
-            style="width: 300px; margin: 1em"
-          />
-        </div>
-      </form>
-      <button type="submit" class="btn btn-success">Register!</button>
     </main>
     <!-- Bootstrap JS -->
     <script

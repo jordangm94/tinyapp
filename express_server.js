@@ -20,13 +20,26 @@ const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser())
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -37,12 +50,14 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
+  // const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
+  const templateVars = {urls: urlDatabase, user: users[req.cookies["user_id"]]};
+  console.log('TEST', templateVars)
   res.render("urls_index", templateVars)
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {username: req.cookies["username"]};
+  const templateVars = {user: users[req.cookies["user_id"]]};
   res.render("urls_new", templateVars);
 });
 
@@ -76,7 +91,7 @@ app.get("/urls/:id", (req, res) => {
   //Store Id in a variable. 
   let id = req.params.id
   //Use id variable to target long url value through object! 
-  const templateVars = { id: req.params.id, longURL: urlDatabase[id], username: req.cookies["username"] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[id], user: users[req.cookies["user_id"]] };
   console.log(id);
   res.render("urls_show", templateVars);
 });
@@ -134,19 +149,26 @@ app.post("/logout", (req, res) => {
 })
 
 ///////////////////////////////////
-//Handle loading registration page to sign up for account. 
+//Handle getting registration page to sign up for account. 
 //////////////////////////////////
 
 app.get("/registration", (req, res) => {
-  const templateVars = { username: req.cookies["username"] }
+  const templateVars = { user: req.cookies["user_id"] }
   res.render("urls_registration", templateVars)
 })
 
 ///////////////////////////////////
-//Handle if registration form is submitted! 
+//Handle redirection if registration form is submitted(is posted)! 
 //////////////////////////////////
 app.post("/registration", (req, res) => {
-  res.render("urls_registration", templateVars)
+  let id = generateRandomString('http://localhost:8080/registration');
+  let email = req.body.email;
+  let password = req.body.password;
+  users[id] = {id: id, email: email, password: password};
+  res.cookie("user_id", id);
+  // const templateVars = { username: req.cookies["username"] }
+  // res.render("urls_registration", templateVars)
+  res.redirect("/urls");
 })
 
 app.get("/hello", (req, res) => {
