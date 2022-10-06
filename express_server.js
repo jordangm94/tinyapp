@@ -140,9 +140,23 @@ app.post("/urls/:id", (req, res) => {
 //Handle redirection after user has submitted username, will store username as cookie. 
 //////////////////////////////////
 app.post("/login", (req, res) => {
-  let username = req.body.username
-  res.cookie("username", username)
-  res.redirect('/urls');
+  //Assign inputted emails and password to variables. 
+  let email = req.body.email;
+  let password = req.body.password;
+  //Check if the inputted email matches any emails in system, if so deny login. 
+  const user = getUserByEmail(email);
+  if (!user) {
+    res.status(403).send('Error: 403: User with this email address cannot be found.'); 
+    //Next, if the inputted email DOES match email in system, check if inputted password matches, if not deny! 
+  } else if (user) {
+    if (password !== user.password) {
+      res.status(403).send('Error: 403: User password does not match password in system. Try again.')
+    }  else {
+      res.cookie("user_id", user.id)
+      res.redirect('/urls');
+      console.log(users);
+    }
+  }
 })
 
 ///////////////////////////////////
@@ -151,6 +165,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect('/urls');
+  console.log(users)
 })
 
 ///////////////////////////////////
@@ -180,6 +195,7 @@ app.post("/registration", (req, res) => {
       // const templateVars = { username: req.cookies["username"] }
       // res.render("urls_registration", templateVars)
       res.redirect("/urls");
+      console.log(users);
   }
 })
 
