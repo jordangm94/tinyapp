@@ -11,7 +11,15 @@ function generateRandomString(randomString) {
     }
   }
   return newString;
-}
+};
+
+function getUserByEmail(email) {
+  for (let key in users) {
+    if (email === users[key].email) {
+      return users[key];
+    } 
+  }
+};
 
 const express = require("express");
 const cookieParser = require('cookie-parser')
@@ -52,7 +60,6 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   // const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
   const templateVars = {urls: urlDatabase, user: users[req.cookies["user_id"]]};
-  console.log('TEST', templateVars)
   res.render("urls_index", templateVars)
 });
 
@@ -77,8 +84,6 @@ app.post("/urls", (req, res) => {
   //Assign new id along with url to urlDatabase. This inputs both the id key and url value into database. 
 
   urlDatabase[id] = req.body.longURL 
-  
-  console.log(urlDatabase); // Log the new URL DATABASE
   
   res.redirect(`/urls/${id}`); // Redirection to /urls/:id
 });
@@ -164,11 +169,18 @@ app.post("/registration", (req, res) => {
   let id = generateRandomString('http://localhost:8080/registration');
   let email = req.body.email;
   let password = req.body.password;
-  users[id] = {id: id, email: email, password: password};
-  res.cookie("user_id", id);
-  // const templateVars = { username: req.cookies["username"] }
-  // res.render("urls_registration", templateVars)
-  res.redirect("/urls");
+  if (email === '' || password === '') {
+    res.status(404).send('Error: 404 Not found. You are missing either a username or password. Please try again!'); 
+  } 
+  else if (getUserByEmail(email)) {
+    res.status(404).send('Error 404: This username has already been registered in our database. Please try again'); 
+  } else {
+      users[id] = {id: id, email: email, password: password};
+      res.cookie("user_id", id);
+      // const templateVars = { username: req.cookies["username"] }
+      // res.render("urls_registration", templateVars)
+      res.redirect("/urls");
+  }
 })
 
 app.get("/hello", (req, res) => {
