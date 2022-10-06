@@ -149,7 +149,7 @@ app.post("/login", (req, res) => {
 //Handle redirection after a user chooses to logout. 
 //////////////////////////////////
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect('/urls');
 })
 
@@ -181,6 +181,14 @@ app.post("/registration", (req, res) => {
       // res.render("urls_registration", templateVars)
       res.redirect("/urls");
   }
+})
+
+///////////////////////////////////
+//Handle login page! 
+//////////////////////////////////
+app.get("/login", (req, res) => {
+  const templateVars = { user: users[req.cookies["user_id"]] }
+  res.render("login", templateVars)
 })
 
 app.get("/hello", (req, res) => {

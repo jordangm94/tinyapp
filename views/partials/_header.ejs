@@ -18,18 +18,12 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         <!-- The next line designates the form for login on the header of each page or logout if user already logged in. -->
         <% if(!user){ %>
-        
-            <form method="POST" action="/login">
-              <input type="text"
-              name="username"
-              placeholder="Type username here!"
-              />
-              <button type="submit" class="btn btn-primary" >Login</button>
-            </form>
+          <a class="nav-item nav-link" href="/login">Login</a>
+          <a class="nav-item nav-link" href="/registration">Register</a>
         <% } else{ %>  
           <h5>Logged in as: <%= user.email %> </h5>
             <form method="POST" action="/logout">
-              <button class="btn-default">logout</button>
+              <button type="submit" class="btn-default">logout</button>
               </form>
        <% } %>
       </div>
