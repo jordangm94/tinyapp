@@ -33,7 +33,8 @@ function urlsForUser(userID, urlDatabase) {
 };
 
 const express = require("express");
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
+const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -41,7 +42,8 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+// app.use(cookieParser());
+app.use(cookieSession({ name: "session", secret: "secret"}));
 
 const urlDatabase = {
   b6UTxQ: {
@@ -76,7 +78,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const user = users[id];
   if(!user) {
     res.send('Error: In order to see a list of your shortened URLS, you must log in.')
@@ -95,14 +97,14 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   //Variables to ensure that user aligns with cookie.
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const user = users[id];
   //If userID cookie exists on computer, than this means they have an account and are logged in, allow through
   if (!user) {
     res.redirect("/login");
     return;
   }
-  const templateVars = { user: users[req.cookies["user_id"]] };
+  const templateVars = { user: users[req.session.user_id] };
   res.render("urls_new", templateVars);
 });
 
@@ -112,7 +114,7 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   //Variables to ensure that user aligns with cookie.
-  const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   const user = users[userID];
   if (user) {
     //req.body.longurl = inputted url, turn this into random string, store in id.
@@ -138,7 +140,7 @@ app.post("/urls", (req, res) => {
 //////////////////////////////////
 
 app.get("/urls/:id", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   const user = users[userID];
   if (!user) {
     res.send('Error: In order to see this particular shortened URL, you must log in.')
@@ -182,7 +184,7 @@ app.get("/u/:id", (req, res) => {
 //////////////////////////////////
 
 app.post("/urls/:id/delete", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   const user = users[userID];
   // if (!user) {
   //   res.send('Error: Only users can delete urls.')
@@ -212,7 +214,12 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   let id = req.params.id;
   let longURL = req.body.longURL;
-  urlDatabase[id].longUrl = longURL;
+  console.log('TESTING');
+  console.log(longURL);
+  console.log(urlDatabase[id]);
+  console.log(urlDatabase);
+  urlDatabase[id].longURL = longURL;
+  console.log(urlDatabase);
   res.redirect("/urls");
 });
 ///////////////////////////////////
@@ -228,10 +235,12 @@ app.post("/login", (req, res) => {
     res.status(403).send("Error: 403: User with this email address cannot be found.");
     //Next, if the inputted email DOES match email in system, check if inputted password matches, if not deny!
   } else if (user) {
+    console.log(bcrypt.compareSync(password, user.password));
     if (!bcrypt.compareSync(password, user.password)) {
       res.status(403).send("Error: 403: User password does not match password in system. Try again.");
     } else {
-      res.cookie("user_id", user.id);
+      // res.cookie("user_id", user.id);
+      req.session.user_id = user.id;
       res.redirect("/urls");
     }
   }
@@ -241,7 +250,9 @@ app.post("/login", (req, res) => {
 //Handle redirection after a user chooses to logout.
 //////////////////////////////////
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  // res.clearCookie("user_id");
+  res.clearCookie("session");
+  res.clearCookie("session.sig");
   res.redirect("/login");
 });
 
@@ -250,7 +261,7 @@ app.post("/logout", (req, res) => {
 //////////////////////////////////
 
 app.get("/registration", (req, res) => {
-  const templateVars = { user: req.cookies["user_id"] };
+  const templateVars = { user: req.session.user_id };
   res.render("urls_registration", templateVars);
 });
 
@@ -258,7 +269,7 @@ app.get("/registration", (req, res) => {
 //Handle redirection if registration form is submitted(is posted)!
 //////////////////////////////////
 app.post("/registration", (req, res) => {
-  let id = generateRandomString("RandomString");
+  let user_id = generateRandomString("RandomString");
   let email = req.body.email;
   let password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
@@ -267,8 +278,9 @@ app.post("/registration", (req, res) => {
   } else if (getUserByEmail(email)) {
       res.status(404).send("Error 404: This username has already been registered in our database. Please try again");
   } else {
-      users[id] = { id: id, email: email, password: hashedPassword };
-      res.cookie("user_id", id);
+      users[user_id] = { id: user_id, email: email, password: hashedPassword };
+      // res.cookie("user_id", id);
+      req.session.user_id = user_id;
       // const templateVars = { username: req.cookies["username"] }
      // res.render("urls_registration", templateVars)
       res.redirect("/urls");
@@ -279,7 +291,7 @@ app.post("/registration", (req, res) => {
 //Handle login page!
 //////////////////////////////////
 app.get("/login", (req, res) => {
-  const templateVars = { user: users[req.cookies["user_id"]] };
+  const templateVars = { user: users[req.session.user_id] };
   res.render("login", templateVars);
 });
 
