@@ -12,7 +12,7 @@ function generateRandomString(randomString) {
     }
   }
   return newString;
-}
+};
 
 function getUserByEmail(email) {
   for (let key in users) {
@@ -20,7 +20,17 @@ function getUserByEmail(email) {
       return users[key];
     }
   }
-}
+};
+
+function urlsForUser(userID, urlDatabase) {
+  const results = { };
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === userID) {
+      results[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return results;
+};
 
 const express = require("express");
 const cookieParser = require("cookie-parser");
@@ -33,20 +43,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
-  userRandomID: {
-    id: "userRandomID",
+  aJ48lW: {
+    id: "aJ48lW",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "a",
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: "b",
   },
 };
 
@@ -59,10 +75,15 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  // const templateVars = {urls: urlDatabase, username: req.cookies["username"]};
+  const id = req.cookies["user_id"];
+  const user = users[id];
+  if(!user) {
+    res.send('Error: In order to see a list of your shortened URLS, you must log in.')
+  }
+  const thisUsersURLS = urlsForUser(user.id, urlDatabase);
   const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]],
+    urls: thisUsersURLS,
+    user
   };
   res.render("urls_index", templateVars);
 });
@@ -90,8 +111,8 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   //Variables to ensure that user aligns with cookie.
-  const userId = req.cookies["user_id"];
-  const user = users[userId];
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
   if (user) {
     //req.body.longurl = inputted url, turn this into random string, store in id.
 
@@ -99,16 +120,15 @@ app.post("/urls", (req, res) => {
 
     //Store value of inputted url into a string for later use
 
-    longUrlValue = req.body.longURL;
+    const longURL = req.body.longURL;
 
     //Assign new id along with url to urlDatabase. This inputs both the id key and url value into database.
 
-    urlDatabase[id] = req.body.longURL;
+    urlDatabase[id] = { longURL: longURL, userID: userID };
 
     res.redirect(`/urls/${id}`); // Redirection to /urls/:id
   } else {
     res.send('You are not logged in!')
-    console.log(urlDatabase);
   }
 });
 
@@ -117,15 +137,27 @@ app.post("/urls", (req, res) => {
 //////////////////////////////////
 
 app.get("/urls/:id", (req, res) => {
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
+  if (!user) {
+    res.send('Error: In order to see this particular shortened URL, you must log in.')
+  }
   //Store Id in a variable.
-  let id = req.params.id;
+  const shortID = req.params.id;
+  //Here thisUserURLS is checking to see which urls this individual has in its account
+  const thisUsersURLS = urlsForUser(userID, urlDatabase);
+  if (!thisUsersURLS[shortID]) {
+    return res.send('Error: This short URL does not belong to this account.');
+  } else {
+    const longURL = thisUsersURLS[shortID].longURL;
+    const templateVars = {
+      id: req.params.id,
+      longURL,
+      user
+    };
+    res.render("urls_show", templateVars);
+  }
   //Use id variable to target long url value through object!
-  const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[id],
-    user: users[req.cookies["user_id"]],
-  };
-  res.render("urls_show", templateVars);
 });
 ///////////////////////////////////
 //Redirect shorturls back to website of long url
@@ -134,10 +166,10 @@ app.get("/u/:id", (req, res) => {
   //Once again targetting id of inputted URL
   let id = req.params.id;
   //Target longurl in object using id and store in variable
-  let longURL = urlDatabase[id];
+  let longURL = urlDatabase[id].longURL;
   //Check if longURL is equal to an undefined value, if it is, than it is not in system. Trigger Error. 
   if (!longURL) {
-    res.send('Error: The short URL you are trying to access does not exist in our database.')
+    res.send('Error: The short URL you are trying to access does not exit in our database.')
   } else {
     //Now will redirect to longurl. NOTE: Only works if url is typed starting with http://
     res.redirect(longURL);
@@ -149,9 +181,27 @@ app.get("/u/:id", (req, res) => {
 //////////////////////////////////
 
 app.post("/urls/:id/delete", (req, res) => {
-  let id = req.params.id;
-  delete urlDatabase[id];
-  res.redirect(`/urls`);
+  const userID = req.cookies["user_id"];
+  const user = users[userID];
+  // if (!user) {
+  //   res.send('Error: Only users can delete urls.')
+  // }
+  // thisUsersURLS = {
+    // abc123: { longURL: 'something', userID: 'J123'}, 
+    // zzz123: { longURL: 'something2', userID: 'J123'}, 
+    // def123: { longURL: 'something3', userID: 'J123'}, 
+  //}
+  // shortID = asd764
+  // urldatabase[shortID] =  { longURL: 'something', userID: 'J123'}
+  const thisUsersURLS = urlsForUser(userID, urlDatabase);
+  let shortID = req.params.id;
+  if (!thisUsersURLS[shortID]) {
+    return res.send('Error: This shortID does not belong to you.')
+  } else {
+    delete urlDatabase[shortID];
+    console.log(urlDatabase);
+    res.redirect(`/urls`);
+  }
 });
 
 ///////////////////////////////////
@@ -161,7 +211,7 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   let id = req.params.id;
   let longURL = req.body.longURL;
-  urlDatabase[id] = longURL;
+  urlDatabase[id].longUrl = longURL;
   res.redirect("/urls");
 });
 ///////////////////////////////////
@@ -197,7 +247,7 @@ app.post("/login", (req, res) => {
 //////////////////////////////////
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 ///////////////////////////////////
