@@ -1,41 +1,9 @@
-function generateRandomString(randomString) {
-  const alphaNumerics =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let newString = "";
-  let loopCount = 0;
-  for (let value of randomString) {
-    value = alphaNumerics[Math.floor(Math.random() * alphaNumerics.length)];
-    newString += value;
-    loopCount = loopCount + 1;
-    if (loopCount > 5) {
-      break;
-    }
-  }
-  return newString;
-};
-
-function getUserByEmail(email) {
-  for (let key in users) {
-    if (email === users[key].email) {
-      return users[key];
-    }
-  }
-};
-
-function urlsForUser(userID, urlDatabase) {
-  const results = { };
-  for (let shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === userID) {
-      results[shortURL] = urlDatabase[shortURL];
-    }
-  }
-  return results;
-};
-
 const express = require("express");
 // const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
+const { getUserByEmail, generateRandomString, urlsForUser } = require("./helpers");
+
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -230,7 +198,7 @@ app.post("/login", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
   //Check if the inputted email matches any emails in system, if so deny login.
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
   if (!user) {
     res.status(403).send("Error: 403: User with this email address cannot be found.");
     //Next, if the inputted email DOES match email in system, check if inputted password matches, if not deny!
@@ -275,7 +243,7 @@ app.post("/registration", (req, res) => {
   const hashedPassword = bcrypt.hashSync(password, 10);
   if (email === "" || password === "") {
     res.status(404).send("Error: 404 Not found. You are missing either a username or password. Please try again!");
-  } else if (getUserByEmail(email)) {
+  } else if (getUserByEmail(email, users)) {
       res.status(404).send("Error 404: This username has already been registered in our database. Please try again");
   } else {
       users[user_id] = { id: user_id, email: email, password: hashedPassword };
