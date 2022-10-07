@@ -34,6 +34,7 @@ function urlsForUser(userID, urlDatabase) {
 
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -195,11 +196,11 @@ app.post("/urls/:id/delete", (req, res) => {
   // urldatabase[shortID] =  { longURL: 'something', userID: 'J123'}
   const thisUsersURLS = urlsForUser(userID, urlDatabase);
   let shortID = req.params.id;
+  console.log(thisUsersURLS[shortID]);
   if (!thisUsersURLS[shortID]) {
     return res.send('Error: This shortID does not belong to you.')
   } else {
     delete urlDatabase[shortID];
-    console.log(urlDatabase);
     res.redirect(`/urls`);
   }
 });
@@ -224,17 +225,11 @@ app.post("/login", (req, res) => {
   //Check if the inputted email matches any emails in system, if so deny login.
   const user = getUserByEmail(email);
   if (!user) {
-    res
-      .status(403)
-      .send("Error: 403: User with this email address cannot be found.");
+    res.status(403).send("Error: 403: User with this email address cannot be found.");
     //Next, if the inputted email DOES match email in system, check if inputted password matches, if not deny!
   } else if (user) {
-    if (password !== user.password) {
-      res
-        .status(403)
-        .send(
-          "Error: 403: User password does not match password in system. Try again."
-        );
+    if (!bcrypt.compareSync(password, user.password)) {
+      res.status(403).send("Error: 403: User password does not match password in system. Try again.");
     } else {
       res.cookie("user_id", user.id);
       res.redirect("/urls");
@@ -263,27 +258,20 @@ app.get("/registration", (req, res) => {
 //Handle redirection if registration form is submitted(is posted)!
 //////////////////////////////////
 app.post("/registration", (req, res) => {
-  let id = generateRandomString("http://localhost:8080/registration");
+  let id = generateRandomString("RandomString");
   let email = req.body.email;
   let password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   if (email === "" || password === "") {
-    res
-      .status(404)
-      .send(
-        "Error: 404 Not found. You are missing either a username or password. Please try again!"
-      );
+    res.status(404).send("Error: 404 Not found. You are missing either a username or password. Please try again!");
   } else if (getUserByEmail(email)) {
-    res
-      .status(404)
-      .send(
-        "Error 404: This username has already been registered in our database. Please try again"
-      );
+      res.status(404).send("Error 404: This username has already been registered in our database. Please try again");
   } else {
-    users[id] = { id: id, email: email, password: password };
-    res.cookie("user_id", id);
-    // const templateVars = { username: req.cookies["username"] }
-    // res.render("urls_registration", templateVars)
-    res.redirect("/urls");
+      users[id] = { id: id, email: email, password: hashedPassword };
+      res.cookie("user_id", id);
+      // const templateVars = { username: req.cookies["username"] }
+     // res.render("urls_registration", templateVars)
+      res.redirect("/urls");
   }
 });
 
