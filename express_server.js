@@ -136,12 +136,12 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   //Once again targetting id of inputted URL
   let id = req.params.id;
-  //Target longurl in object using id and store in variable
-  let longURL = urlDatabase[id].longURL;
-  //Check if longURL is equal to an undefined value, if it is, than it is not in system. Trigger Error. 
-  if (!longURL) {
-    res.send('Error: The short URL you are trying to access does not exit in our database.')
+  //Check if ID exists in URL Database, if not trigger error. 
+  if (!urlDatabase[id]) {
+    res.send('Error: The short URL you are trying to access does not exist in our database.')
   } else {
+      //Target longurl in object using id and store in variable
+      let longURL = urlDatabase[id].longURL;
     //Now will redirect to longurl. NOTE: Only works if url is typed starting with http://
     res.redirect(longURL);
   }
