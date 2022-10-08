@@ -27,7 +27,7 @@ function generateRandomString(randomString) {
   return newString;
 }
 ///////////////////////////////////
-//This function looks up the URLS belonging to users and returns shortURL object containing longURL and UserID. 
+//This function looks up the URLS belonging to users and returns shortURL object containing longURL and UserID.
 //////////////////////////////////
 function urlsForUser(userID, urlDatabase) {
   const results = {};
