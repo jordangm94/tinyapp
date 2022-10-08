@@ -48,15 +48,16 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const id = req.session.user_id;
   const user = users[id];
-  if(!user) {
-    res.send('Error: In order to see a list of your shortened URLS, you must log in.')
+  if(user) {
+    const thisUsersURLS = urlsForUser(user.id, urlDatabase);
+    const templateVars = {
+      urls: thisUsersURLS,
+      user
+    };
+    res.render("urls_index", templateVars);
+  } else {
+    res.send('Error: In order to see a list of your shortened URLS, you must log in.');
   }
-  const thisUsersURLS = urlsForUser(user.id, urlDatabase);
-  const templateVars = {
-    urls: thisUsersURLS,
-    user
-  };
-  res.render("urls_index", templateVars);
 });
 
 ///////////////////////////////////
