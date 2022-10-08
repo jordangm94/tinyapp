@@ -1,5 +1,4 @@
 const express = require("express");
-// const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const { getUserByEmail, generateRandomString, urlsForUser } = require("./helpers");
@@ -10,7 +9,6 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
-// app.use(cookieParser());
 app.use(cookieSession({ name: "session", secret: "secret"}));
 
 const urlDatabase = {
@@ -167,7 +165,6 @@ app.post("/urls/:id/delete", (req, res) => {
   // urldatabase[shortID] =  { longURL: 'something', userID: 'J123'}
   const thisUsersURLS = urlsForUser(userID, urlDatabase);
   let shortID = req.params.id;
-  console.log(thisUsersURLS[shortID]);
   if (!thisUsersURLS[shortID]) {
     return res.send('Error: This shortID does not belong to you.')
   } else {
@@ -183,12 +180,7 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   let id = req.params.id;
   let longURL = req.body.longURL;
-  console.log('TESTING');
-  console.log(longURL);
-  console.log(urlDatabase[id]);
-  console.log(urlDatabase);
   urlDatabase[id].longURL = longURL;
-  console.log(urlDatabase);
   res.redirect("/urls");
 });
 ///////////////////////////////////
@@ -204,7 +196,6 @@ app.post("/login", (req, res) => {
     res.status(403).send("Error: 403: User with this email address cannot be found.");
     //Next, if the inputted email DOES match email in system, check if inputted password matches, if not deny!
   } else if (user) {
-    console.log(bcrypt.compareSync(password, user.password));
     if (!bcrypt.compareSync(password, user.password)) {
       res.status(403).send("Error: 403: User password does not match password in system. Try again.");
     } else {
