@@ -1,3 +1,6 @@
+///////////////////////////////////
+//This function looks for email in database, if match, returns the user object.
+//////////////////////////////////
 function getUserByEmail(email, database) {
   for (let key in database) {
     if (email === database[key].email) {
@@ -5,7 +8,9 @@ function getUserByEmail(email, database) {
     }
   }
 }
-
+///////////////////////////////////
+//This function generates a randomString of 6 charachters, used to assign random IDs in project.
+//////////////////////////////////
 function generateRandomString(randomString) {
   const alphaNumerics =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -21,7 +26,9 @@ function generateRandomString(randomString) {
   }
   return newString;
 }
-
+///////////////////////////////////
+//This function looks up the URLS belonging to users and returns shortURL object containing longURL and UserID. 
+//////////////////////////////////
 function urlsForUser(userID, urlDatabase) {
   const results = {};
   for (let shortURL in urlDatabase) {
