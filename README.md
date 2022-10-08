@@ -37,6 +37,6 @@ TinyApp is a full stack web application built with Node and Express that allows 
 - The Tiny App web application works best when using full urls in url shortening process.
   - I.e. https://www.google.ca/ vs. www.google.ca
 - When testing app refrain from using example users in user database, register a new user and use your credentials to login.
-  - This is becaue the login post route uses `bcrypt.compareSync` and expects to receive a hashed password from database when comparing passwords. 
+  - This is because the login post route uses `bcrypt.compareSync` and expects to receive a hashed password from database when comparing passwords. 
   - However, example passwords were not hashed and this will result in login failure. 
 - All helper functions for this web application are stored in the helpers.js file. 
