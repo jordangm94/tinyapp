@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({ name: "session", secret: "secret" }));
 
 ///////////////////////////////////
-//URL Database - Object to store shortened URL and it's corresponding information. The longurl it codes for and user it belong to. 
+//URL Database - Object to store shortened URL and it's corresponding information. The longurl it codes for and user it belong to.
 //////////////////////////////////
 const urlDatabase = {
   b6UTxQ: {
@@ -54,7 +54,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 ///////////////////////////////////
-//URLS page - Displays list of users shortened URLS. 
+//URLS page - Displays list of users shortened URLS.
 //////////////////////////////////
 app.get("/urls", (req, res) => {
   const id = req.session.user_id;
@@ -86,7 +86,7 @@ app.get("/urls/new", (req, res) => {
     res.redirect("/login");
     return;
   }
-  //Otherwise, allow user through. 
+  //Otherwise, allow user through.
   const templateVars = { user: users[req.session.user_id] };
   res.render("urls_new", templateVars);
 });
@@ -99,7 +99,7 @@ app.post("/urls", (req, res) => {
   //Variables to ensure that user aligns with cookie.
   const userID = req.session.user_id;
   const user = users[userID];
-  //If user is logged in, allow new URL to be entered into database. 
+  //If user is logged in, allow new URL to be entered into database.
   if (user) {
     //req.body.longurl = inputted url, turn this into random string, store in id.
 
@@ -114,7 +114,7 @@ app.post("/urls", (req, res) => {
     urlDatabase[id] = { longURL: longURL, userID: userID };
 
     res.redirect(`/urls/${id}`);
-    //If user is not logged in, than they ca
+    //If user is not logged in, deny entry.
   } else {
     res.send("You are not logged in!");
   }
@@ -126,7 +126,7 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
-  //A user cannot have access to thhis page if they are not a user. 
+  //A user cannot have access to thhis page if they are not a user.
   if (!user) {
     res.send(
       "Error: In order to see this particular shortened URL, you must log in."
@@ -136,7 +136,7 @@ app.get("/urls/:id", (req, res) => {
   const shortID = req.params.id;
   //Here thisUserURLS is checking to see which urls this individual has in its account
   const thisUsersURLS = urlsForUser(userID, urlDatabase);
-  //If url does not exist in users account, throw error. 
+  //If url does not exist in users account, throw error.
   if (!thisUsersURLS[shortID]) {
     return res.send("Error: This short URL does not belong to this account.");
     //Otherwise allow user to access url via /urls/id (code below).
@@ -176,8 +176,6 @@ app.get("/u/:id", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   //Acquire userID from cookie information.
   const userID = req.session.user_id;
-  //Using userID to find user in Users database, store user in variable.
-  const user = users[userID];
   //Use urlsForUser function in order to return urls belonging to user object. I.e. { JckHlB: { longURL: 'http://www.bestbuy.ca', userID: 'k26Ba4' } }
   const thisUsersURLS = urlsForUser(userID, urlDatabase);
   //Designate shortID to be shortened URL, this will allow us to target and access object in comment above.
@@ -209,7 +207,7 @@ app.post("/login", (req, res) => {
   //Assign inputted emails and password to variables.
   let email = req.body.email;
   let password = req.body.password;
-  //Check if the inputted email matches any emails in system, store in user variable. 
+  //Check if the inputted email matches any emails in system, store in user variable.
   const user = getUserByEmail(email, users);
   //If user is falsey, this means email does does not exist in system. Throw error, deny login.
   if (!user) {
@@ -224,7 +222,7 @@ app.post("/login", (req, res) => {
         .send(
           "Error: 403: User password does not match password in system. Try again."
         );
-        //Otherwise allow user into the site via login credentials. 
+      //Otherwise allow user into the site via login credentials.
     } else {
       req.session.user_id = user.id;
       res.redirect("/urls");
@@ -236,7 +234,7 @@ app.post("/login", (req, res) => {
 //Handle redirection after a user chooses to logout.
 //////////////////////////////////
 app.post("/logout", (req, res) => {
-  //Clear cookies off of browser after session is finished for security purposes. 
+  //Clear cookies off of browser after session is finished for security purposes.
   res.clearCookie("session");
   res.clearCookie("session.sig");
   res.redirect("/login");
@@ -254,7 +252,7 @@ app.get("/registration", (req, res) => {
 //Handle submission of Registration form!
 //////////////////////////////////
 app.post("/registration", (req, res) => {
-  //Generate random string for user ID, and acquire email and password from request and store in variables. 
+  //Generate random string for user ID, and acquire email and password from request and store in variables.
   let user_id = generateRandomString("RandomString");
   let email = req.body.email;
   let password = req.body.password;
@@ -265,15 +263,15 @@ app.post("/registration", (req, res) => {
       .send(
         "Error: 404 Not found. You are missing either a username or password. Please try again!"
       );
-      //If Email is found in users database, return error, because cannot register same user twice. 
+    //If Email is found in users database, return error, because cannot register same user twice.
   } else if (getUserByEmail(email, users)) {
     res
       .status(404)
       .send(
         "Error 404: This username has already been registered in our database. Please try again"
       );
-      //If no previous email found in user database, register here (code below).
-      //Handle hashing password only in the else below, only when officially registering, save server from extra work! 
+    //If no previous email found in user database, register here (code below).
+    //Handle hashing password only in the else below, only when officially registering, save server from extra work!
   } else {
     const hashedPassword = bcrypt.hashSync(password, 10);
     users[user_id] = { id: user_id, email: email, password: hashedPassword };
