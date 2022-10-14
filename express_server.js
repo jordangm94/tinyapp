@@ -46,7 +46,14 @@ const users = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const id = req.session.user_id;
+  const user = users[id];
+  if (!user) {
+    res.redirect("/login");
+    return;
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
